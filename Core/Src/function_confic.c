@@ -5,6 +5,8 @@
  *      Author: MSI-
  */
 
+static unsigned char Error_code_G = 0;
+
 void SCH_Report_Status ( void ) {
 #ifdef SCH_REPORT_ERRORS
 	// ONLY APPLIES IF WE ARE REPORTING ERRORS
@@ -21,7 +23,7 @@ void SCH_Report_Status ( void ) {
 	} else{
 		if ( Error_tick_count_G != 0 ) {
 			if (--Error_tick_count_G == 0 ) {
-			Error_code_G = 0; // Reset e r ro r code
+			Error_code_G = 0; // Reset error code
 			}
 		}
 	}
@@ -48,13 +50,13 @@ sTask SCH_tasks_G[SCH_MAX_TASKS ] ;
 
 unsigned char SCH_Delete_Task ( const tByte TASK_INDEX) {
 	unsigned char Return_code ;
-	if( SCH_tasks_G [TASK_INDEX ] . pTask == 0 ) {
+	if( SCH_tasks_G [TASK_INDEX ].pTask == 0 ) {
 		// No task at this location...
 		//
 		// Set the global error variable
 		Error_code_G = ERROR_SCH_CANNOT_DELETE_TASK
 
-		// . . . also return an e r ro r code
+		// . . . also return an error code
 		Return_code = RETURN_ERROR;
 	} else {
 		Return_code = RETURN_NORMAL;

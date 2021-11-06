@@ -58,16 +58,20 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define LED_Pin GPIO_PIN_3
+#define LED_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
+
 // Comment this line out if error reporting is NOT required
 //#define SCH_REPORT_ERRORS
-//Where error reporting is required , the port on which error codes will be displayed
-// i s also determined via main.h:
+//Where error reporting is required ,the port on which error codes will be displayed
+// is also determined via main.h:
 #ifdef SCH_REPORT_ERRORS
-// The port on which e r ro r codes will be displayed
+// The port on which error codes will be displayed
 // ONLY USED IF ERRORS ARE REPORTED
 #define Error_port PORTA
 #endif
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -9,6 +9,7 @@
 
 static unsigned char Error_code_G = 0;
 static unsigned int smallest_time_index = 0;
+static unsigned int size = 0;
 typedef unsigned char tByte;
 #define ERROR_SCH_CANNOT_DELETE_TASK	1
 #define ERROR_SCH_TOO_MANY_TASKS		2
@@ -54,7 +55,7 @@ typedef struct {
 }sTask;
 
 // MUST BE ADJUSTED FOR EACH NEW PROJECT
-#define SCH_MAX_TASKS 	100
+#define SCH_MAX_TASKS 	40
 #define NO_TASK_ID 		0
 sTask SCH_tasks_G[SCH_MAX_TASKS];
 
@@ -69,6 +70,7 @@ unsigned char SCH_Delete_Task ( const tByte TASK_INDEX) {
 		// . . . also return an error code
 		Return_code = RETURN_ERROR;
 	} else {
+		size--;
 		Return_code = RETURN_NORMAL;
 	}
 	SCH_tasks_G [TASK_INDEX].pTask = 0x0000 ;
@@ -86,12 +88,13 @@ unsigned char SCH_Delete_Task ( const tByte TASK_INDEX) {
 void SCH_Init ( void ) {
 	unsigned char i ;
 	for( i = 0; i < SCH_MAX_TASKS; i ++) {
-		SCH_Delete_Task(i) ;
+		SCH_Delete_Task(i);
 	}
 	// Reset the global error variable
 	// − SCH_Delete_Task () will generate an error code ,
 	// (because the task array is empty)
 	Error_code_G = 0;
+	size = 0;
 	//Timer_init() ;
 	//Watchdog_init ( ) ;
 }
@@ -191,20 +194,31 @@ unsigned char SCH_Add_Task( void(*pFunction)() , unsigned int DELAY,unsigned int
 	SCH_tasks_G[Index].saveDelay = DELAY;
 	SCH_tasks_G[Index].Period = PERIOD;
 	SCH_tasks_G[Index].RunMe = 0;
+	size++;
 
 	// Find the smallest delay
-	int smallest_delay = DELAY;
-	int smallest_index = Index;
+//	int smallest_delay = DELAY;
+//	int smallest_index = Index;
 
-	for(int i = 0; i < SCH_MAX_TASKS; i++) {
-		if(SCH_tasks_G[i].pTask) {
-			if(smallest_delay > SCH_tasks_G[i].Delay) {
-				smallest_delay = SCH_tasks_G[i].Delay;
-				smallest_index = i;
-			}
+	if(size == 1) {
+		smallest_time_index = Index;
+	}
+	else {
+		if(SCH_tasks_G[smallest_time_index].Delay > DELAY) {
+			smallest_time_index = Index;
 		}
 	}
-	smallest_time_index = smallest_index;
+
+//	for(int i = 0; i < SCH_MAX_TASKS; i++) {
+//		if(SCH_tasks_G[i].pTask) {
+//			if(smallest_delay > SCH_tasks_G[i].Delay) {
+//				smallest_delay = SCH_tasks_G[i].Delay;
+//				smallest_index = i;
+//			}
+//		}
+//	}
+//	smallest_time_index = smallest_index;
+
 	//return position of task ( to allow later deletion )
 	return Index;
 }

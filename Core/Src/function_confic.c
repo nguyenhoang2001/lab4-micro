@@ -142,12 +142,13 @@ void Update_when_smallest_Run(void) {
 				if(i == Index)
 					continue;
 				if(SCH_tasks_G[i].pTask) {
-					SCH_tasks_G[i].Delay -= SCH_tasks_G[Index].saveDelay;
+					if(SCH_tasks_G[i].Delay > 0) {
+						SCH_tasks_G[i].Delay -= SCH_tasks_G[Index].saveDelay;
 
-					if(SCH_tasks_G[i].Delay == 0) {
-						Update_Delay_whenCome_zero(i);
+						if(SCH_tasks_G[i].Delay == 0) {
+							Update_Delay_whenCome_zero(i);
+						}
 					}
-
 					if(count == 0) {
 						smallest_delay = SCH_tasks_G[i].Delay;
 						smallest_index = i;
@@ -168,7 +169,7 @@ void Update_when_smallest_Run(void) {
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim ) {
 	SCH_Update();
-	Update_when_smallest_Run();
+	//Update_when_smallest_Run();
 }
 
 unsigned char SCH_Add_Task( void(*pFunction)() , unsigned int DELAY,unsigned int PERIOD)
@@ -222,26 +223,32 @@ unsigned char SCH_Add_Task( void(*pFunction)() , unsigned int DELAY,unsigned int
 	//return position of task ( to allow later deletion )
 	return Index;
 }
-
+static unsigned int index_dispatch = 0;
 void SCH_Dispatch_Tasks ( void )
 {
-	unsigned char Index ;
-	// Dispatches (runs ) the next task ( i f one i s ready )
-	for ( Index = 0; Index < SCH_MAX_TASKS; Index++) {
-		if ( SCH_tasks_G[Index].RunMe > 0 ) {
-			(*SCH_tasks_G[Index].pTask )(); // Run the task
-			SCH_tasks_G[Index].RunMe = 0; // Reset / reduce RunMe flag
+//	unsigned char Index ;
+//	// Dispatches (runs ) the next task ( i f one i s ready )
+//	for ( Index = 0; Index < SCH_MAX_TASKS; Index++) {
+	if(index_dispatch == 0) {
+		Update_when_smallest_Run();
+	}
+
+		if ( SCH_tasks_G[index_dispatch].RunMe > 0 ) {
+			(*SCH_tasks_G[index_dispatch].pTask )(); // Run the task
+			SCH_tasks_G[index_dispatch].RunMe = 0; // Reset / reduce RunMe flag
 			// Periodic tasks will automatically run again
 			// − if this is a ’one shot ’ task , remove it from the array
-			if(SCH_tasks_G[Index].Period == 0 )
+			if(SCH_tasks_G[index_dispatch].Period == 0 )
 			{
-				SCH_Delete_Task(Index) ;
+				SCH_Delete_Task(index_dispatch);
 			}
 		}
-	}
+		if(++index_dispatch == SCH_MAX_TASKS) {
+			index_dispatch = 0;
+		}
+	//}
 	// Report system status
 	//SCH_Report_Status();
 	// The scheduler enters idle mode at this point
 	//SCH_Go_To_Sleep() ;
 }
-
